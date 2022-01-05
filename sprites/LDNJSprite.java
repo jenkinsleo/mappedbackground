@@ -162,6 +162,8 @@ public class LDNJSprite implements DisplayableSprite, MovableSprite, CollidingSp
 
 		}
 		
+		insideExit(universe, deltaY, deltaY);
+		
 	}
 
 	private boolean checkCollisionWithBarrier(Universe sprites, double deltaX, double deltaY) {
@@ -180,6 +182,22 @@ public class LDNJSprite implements DisplayableSprite, MovableSprite, CollidingSp
 			}
 		}		
 		return colliding;		
+	}
+	private void insideExit(Universe sprites, double deltaX, double deltaY) {
+		for (DisplayableSprite sprite : sprites.getSprites()) {
+			if (sprite instanceof ExitSprite) {
+				
+				if (CollisionDetection.inside(this.getMinX() + deltaX, this.getMinY() + deltaY, 
+						this.getMaxX()  + deltaX, this.getMaxY() + deltaY, 
+						sprite.getMinX(),sprite.getMinY(), 
+						sprite.getMaxX(), sprite.getMaxY())) {
+					//System.out.println("yes");
+					this.exitStatus = true;
+					
+					break;					
+				}
+			}
+		}
 	}
 	//these need to be here
 	@Override

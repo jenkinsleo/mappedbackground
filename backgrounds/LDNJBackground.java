@@ -9,11 +9,14 @@ import java.lang.Math;
 import javax.imageio.ImageIO;
 
 public class LDNJBackground implements Background {
-	 private Image wood;
 	 private Image stone;
 	 private Image path;
-	 private Image water;
 	 private Image grass;
+	 
+	 private int wallNum = 2;
+ 	 private int floorNum = 1;
+ 	 private int pathNum = 4;
+ 	 private int exitNum = 5;
 
     protected static int TILE_WIDTH = 50;
     protected static int TILE_HEIGHT = 50;
@@ -26,9 +29,8 @@ public class LDNJBackground implements Background {
     
     public LDNJBackground() {
     	try {
-    		this.wood = ImageIO.read(new File("res/castle-tiles/wood_tile.jpg"));
+    		
     		this.stone = ImageIO.read(new File("res/castle-tiles/stone_tile.jpg"));
-    		this.water = ImageIO.read(new File("res/castle-tiles/water_tile.jpg"));
     		this.path = ImageIO.read(new File("res/castle-tiles/lightstonepath.png"));    		
     		this.grass = ImageIO.read(new File("res/castle-tiles/grass.jpg"));
     		
@@ -44,17 +46,17 @@ public class LDNJBackground implements Background {
     
     private void createRandomMap() {
     	//map settings
-    	int maxR = 50;
-    	int maxC = 50;
+    	//adjust these, smaller wall chance more walls will be placed, bigger number less.
+    	int maxR = 20;
+    	int maxC = 20;
+    	boolean border = true;
+    	int wallChance = 5;
     	
-    	int wallNum = 2;
-    	int floorNum = 1;
-    	int pathNum = 4;
+    	
     	
     	
     	//dont change these
     	int prevPoint = 0;
-    	boolean border = true;
     	int same = 2;
     	int nextPoint;
     	int getPoint;
@@ -65,6 +67,7 @@ public class LDNJBackground implements Background {
     	boolean[][] pathMap = new boolean[maxR][maxC];
     	boolean[][] borderMap = new boolean[maxR][maxC];
     	newMap = new int[maxR][maxC];
+    	boolean exitBefore = false;
     	
     	//creates the path
     	//i was exhausted at 3 am when i made this but it works really well
@@ -112,23 +115,23 @@ public class LDNJBackground implements Background {
     	//final for loop for starting row
     	
     	for (int firstNum = 0; firstNum < pathMap[1].length; firstNum ++) {
-    		System.out.println("checking0 (this should work)");
+    		//System.out.println("checking0 (this should work)");
     		if (pathMap[1][firstNum] == true) {
     			break;
     		} else {
     			pathMap[1][firstNum] = true;
     		}
     	}
-    	System.out.println("checking1 (this should work)");
+    	//System.out.println("checking1 (this should work)");
     	//draws the border 
     	
     	if (border == true) {
     		
-    		for (int rows = 0; rows > maxR; rows ++) {
-    			System.out.println("checking2 doesnt work");
+    		for (int rows = 0; rows < maxR; rows ++) {
+    			//System.out.println("checking2 doesnt work");
     			
-    			for (int columns = 0; columns > maxC; columns ++) {
-    				System.out.println("checking3 doesnt work");
+    			for (int columns = 0; columns < maxC; columns ++) {
+    				//System.out.println("checking3 doesnt work");
     				if (rows == 0 || columns == 0|| rows == maxR-1|| columns == maxC-1) {
     					borderMap[rows][columns] = true;
     				}
@@ -138,18 +141,34 @@ public class LDNJBackground implements Background {
     	
 
     	//main loop to put it all together
-    	for (int rows1 = 0; rows1 > maxR; rows1 ++) {
-    		System.out.println("checking4 doesnt work");
-			for (int columns1 = 0; columns1 > maxC; columns1 ++) {
-				System.out.println("checking5 doesnt work");
+    	for (int rows1 = 0; rows1 < maxR; rows1 ++) {
+    		//System.out.println("checking4 doesnt work");
+			for (int columns1 = 0; columns1 < maxC; columns1 ++) {
+				//System.out.println("checking5 doesnt work");
 				if (borderMap[rows1][columns1] == true) {
 					newMap[rows1][columns1] = wallNum;
-				} else if(pathMap[rows1][columns1] == true) {
+				} else if(pathMap[rows1][columns1] == true && exitBefore == false) {
 					newMap[rows1][columns1] = pathNum;
 					
 				} else {
-					newMap[rows1][columns1] = floorNum;
+					int chance = (int) (Math.random() * wallChance);
+					if (chance == 0) {
+						if (rows1 > 3 || columns1 > 3) {
+							newMap[rows1][columns1] = wallNum;
+						} else {
+							newMap[rows1][columns1] = floorNum;
+						}
+						
+					} else {
+						newMap[rows1][columns1] = floorNum;
+					}
+					
+					
 				}
+			if (rows1 == maxR-2 && pathMap[rows1][columns1] == true && exitBefore == false) {
+				exitBefore = true;
+				newMap[rows1][columns1] = exitNum;
+			}
 			}
 		}
     	
@@ -165,20 +184,17 @@ public class LDNJBackground implements Background {
 		if (row < 0 || row > maxRows || col < 0 || col > maxCols) {
 			image = null;
 		}
-		else if (map[row][col] == 1) {
+		else if (map[row][col] == floorNum) {
 			image = path;
 		}
-		else if (map[row][col] == 2) {
+		else if (map[row][col] == wallNum) {
 			image = stone;
 		}
-		else if (map[row][col] == 3) {
-			image = water;
-		}
-		else if (map[row][col] == 4) {
+		else if (map[row][col] == pathNum) {
 			image = grass;
 		}
-		else if (map[row][col] == 5) {
-			image = wood;
+		else if (map[row][col] == exitNum) {
+			image = grass;
 		}
 		else {
 			image = null;
@@ -236,8 +252,10 @@ public class LDNJBackground implements Background {
 		ArrayList<DisplayableSprite> barriers = new ArrayList<DisplayableSprite>();
 		for (int col = 0; col < map[0].length; col++) {
 			for (int row = 0; row < map.length; row++) {
-				if (map[row][col] == 1) {
+				if (map[row][col] == wallNum) {
 					barriers.add(new BarrierSprite(col * TILE_WIDTH, row * TILE_HEIGHT, (col + 1) * TILE_WIDTH, (row + 1) * TILE_HEIGHT, false));
+				} else if(map[row][col] == exitNum) {
+					barriers.add(new ExitSprite(col * TILE_WIDTH, row * TILE_HEIGHT, (col + 1) * TILE_WIDTH, (row + 1) * TILE_HEIGHT, true));
 				}
 			}
 		}

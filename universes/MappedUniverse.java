@@ -45,6 +45,8 @@ public class MappedUniverse implements Universe {
 	}
 	
 	public boolean isComplete() {
+		
+		
 		return complete;
 	}
 
@@ -69,7 +71,7 @@ public class MappedUniverse implements Universe {
 	}		
 	
 	public void update(KeyboardInput keyboard, long actual_delta_time) {
-
+		complete = ((LDNJSprite) player1).getIsAtExit();
 		if (keyboard.keyDownOnce(27)) {
 			complete = true;
 		}
@@ -77,6 +79,7 @@ public class MappedUniverse implements Universe {
 		for (int i = 0; i < sprites.size(); i++) {
 			DisplayableSprite sprite = sprites.get(i);
 			sprite.update(this, keyboard, actual_delta_time);
+			//System.out.println(sprite.getClass().toString());
     	} 
 	}
 
